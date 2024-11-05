@@ -80,4 +80,10 @@ function()
 
     Route::post('/Update/Outdoor',[ContentController::class,'editOutdoor']);
 
+    Route::post('/Add/Curriculum',[ContentController::class,'addCurriculum']);
+
+    Route::get('/Get/Curriculum',[ContentController::class,'getCurriculum']);
+
+    Route::post('/Update/Curriculum',[ContentController::class,'editCurriculum']);
+
 });
