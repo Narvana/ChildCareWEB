@@ -74,4 +74,10 @@ function()
 
     Route::post('/Update/PickUpDropOff',[ContentController::class,'editPickUpDropOff']);
 
+    Route::post('/Add/Outdoor',[ContentController::class,'addOutdoor']);
+
+    Route::get('/Get/Outdoor',[ContentController::class,'getOutdoor']);
+
+    Route::post('/Update/Outdoor',[ContentController::class,'editOutdoor']);
+
 });
