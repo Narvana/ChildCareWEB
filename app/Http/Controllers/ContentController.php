@@ -251,7 +251,245 @@ class ContentController extends Controller
         }
     }
 
+    /**
+     * @group Environment
+     * 
+     * Retrieve a list of Environment.
+     *
+     * This endpoint fetches all content entries where the `page` is set to "Environment.
+     * If no content is found, it returns an error message.
+     *
+     * @response 200 {
+     *   "success": 1,
+     *   "message": "Clean and Safe Environment List",
+     *   "data": [
+     *     {
+     *       "id": 1,
+     *       "page": "Environment",
+     *       "content": "Sample content",
+     *       "image_url": "https://example.com/image.jpg",
+     *       "heading": "Sample Heading",
+     *       "created_at": "2024-11-04T10:00:00.000000Z",
+     *       "updated_at": "2024-11-04T10:00:00.000000Z"
+     *     }
+     *   ]
+     * }
+     *
+     * @response 404 {
+     *   "success": 0,
+     *   "error": "No Environment Content Found"
+     * }
+     */
 
+    public function getEnvironment()
+    {
+        $contents = Content::where('page', 'Environment')->get();
+        if($contents->isEmpty())
+        {
+            return response()->json([
+                'success' => 0,
+                'error' => 'No Environment Content Found',
+            ],404);
+        }
+        return response()->json([
+            'success' => 1,
+            'message' => 'Clean and Safe Enviroment Content List',
+            'data' => $contents
+        ],200);
+    }
 
+    /**
+     * @group Environment
+     * 
+     * Add Environment Content
+     *
+     * Adds a new Environment Content with content, image, and heading.
+     *
+     * @bodyParam content string required The content for the Environment. Example: "Environment description here."
+     * @bodyParam image file required The image file for the Environment (jpeg, png, jpg, gif, webp, max: 5048kb).
+     * @bodyParam heading string required The heading for the Environment. Example: "New Environment Heading"
+     * @response 201 {
+     *   "success": 1,
+     *   "message": "Environment Content Added Successfully",
+     *   "data": {
+     *            "page": "Environment",
+     *               "content": "This is the api where you can add content for Environment",
+     *              "image_url": "https://res.cloudinary.com/douuxmaix/image/upload/v1730797140/kcqitrbuiev0e7cbbolc.webp",
+     *               "heading": "Adding Environment Heading",
+     *              "updated_at": "2024-11-05T08:58:54.000000Z",
+     *            "created_at": "2024-11-05T08:58:54.000000Z",
+     *               "id": 4
+     *  }
+     * }
+     * @resposne 422 {
+     * "success": 0,
+     * "error" : "Validation Error Message"
+     * } 
+     * @response 500 {
+     * "success": 0,
+     * "message": "Error while Adding Environment Content",
+     * "error": "Error Message"
+     * }
+     */
 
+    public function addEnvironment(Request $request)
+    {
+        $validator=Validator::make($request->all(),[
+            'content'=>'required',
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5048',
+            'heading' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => 0,
+                'error' => $validator->errors()->first()
+            ], 422);
+        }
+
+        try {
+            //code...
+            $image = $request->file('image');
+            $cloudinary = new Cloudinary();
+            $uploadResponse = $cloudinary->uploadApi()->upload($image->getRealPath());
+            $imageUrl = $uploadResponse['secure_url'];
+    
+            $content=Content::create([
+                'page' => 'Environment',
+                'content' =>  str_replace("'", '#', $request->content),
+                'image_url' => $imageUrl,
+                'heading' => $request->heading
+            ]);
+    
+            return response()->json([
+                'success' => 1,
+                'message' => 'Clean and Safe Environment Content Added Successfully',
+                'data' =>  $content
+            ]);
+        } catch (\Exception $e) {
+            // Handle any exceptions
+            return response()->json([
+                'success' => 0,
+                'message' => 'Error while Adding Enviroment Content',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * @group Environment
+     * 
+     * Edit a Environment
+     *
+     * Updates an existing Environment based on the provided ID.
+     *
+     * @bodyParam id integer required The ID of the Environment to update. Example: 1
+     * @bodyParam content string The updated content for the Environment. Example: "Updated Environment content."
+     * @bodyParam heading string The updated heading for the Environment. Example: "Updated Environment Heading"
+     * @bodyParam image file The updated image file for the Environment (jpeg, png, jpg, gif, webp, max: 5048kb).
+     * @response {
+     *   "success": 1,
+     *   "message": "Environment Updated Successfully",
+     *   "data": {
+     *     "id": 1,
+     *     "page": "Environment",
+     *     "content": "Updated Environment content",
+     *     "image_url": "https://example.com/updated-image.jpg",
+     *     "heading": "Updated Environment Heading"
+     *   }
+     * }
+     * @response 422 {
+     *   "success": 0,
+     *   "error": "Validation error message"
+     * }
+     * @response 404 {
+     *   "success": 0,
+     *   "error": "No data found with the provided Id"
+     * }
+     * @response 400 {
+     *   "success": 0,
+     *   "error": "Provide the field that you want to update"
+     * }
+     * @response 400 {
+     *   "success": 0,
+     *   "error": "Content found, but it does not belong to the Environment page"
+     * }
+     * @response 500 {
+     * "success": 0,
+     * "message": "Error while Updating Environment",
+     * "error": "Error Message"
+     * }
+     */
+
+    public function editEnvironment(Request $request)
+    {
+        $validator=Validator::make($request->all(),[
+            'id'=>'required|exists:contents,id',
+            'content'=>'sometimes',
+            'heading' => 'sometimes',
+            'image' => 'sometimes|image|mimes:jpeg,png,jpg,gif,webp|max:5048',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => 0,
+                'error' => $validator->errors()->first() // Get the first error message directly
+            ], 422);
+        }
+
+        try {
+            //code...
+            $content = Content::where('id', $request->id)->first();
+
+            if (!$content) {
+                return response()->json([
+                    'success' => 0,
+                    'error' => 'No data found with the provided Id'
+                ]);
+            }
+
+            if($content->page !== 'Environment')
+            {
+                return response()->json([
+                    'success' => 0,
+                    'error' => 'Content found, but it does not belong to the Environment page',
+                ],400);
+            }
+    
+            if(!$request->hasfile('image') && !$request->content && !$request->heading)
+            {
+                return response()->json([
+                    'success' => 0,
+                    'error' => 'Provide the field that you want to update'
+                ]); 
+            }
+    
+            if($request->hasFile('image')) {
+                $cloudinary = new Cloudinary();
+                $uploadResponse = $cloudinary->uploadApi()->upload($request->file('image')->getRealPath());
+                $imageUrl = $uploadResponse['secure_url'];
+            } else {
+                $imageUrl = $content->image_url;
+            }
+        
+            $content->update([
+                'content' => $request->content ? str_replace("'", '#', $request->content) : $content->content ,
+                'image_url' => $imageUrl,
+                'heading' => $request->heading ? $request->heading : $content->heading,
+            ]);
+    
+            return response()->json([
+                'success' => 1,
+                'message' => 'Project & Activities Content Updated Successfully',
+                'data' => $content
+            ]);
+        } catch (\Exception $e) {
+            // Handle any exceptions
+            return response()->json([
+                'success' => 0,
+                'message' => 'Error while Adding Project and Activities',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }
