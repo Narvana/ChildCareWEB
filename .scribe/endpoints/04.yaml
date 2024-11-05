@@ -1,0 +1,309 @@
+name: HomeReading
+description: ''
+endpoints:
+  -
+    httpMethods:
+      - POST
+    uri: api/admin/Add/HomeReading
+    metadata:
+      groupName: HomeReading
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: |-
+        Add Home and Reading Content
+
+        Adds a new Home and Reading Content with content, image, and heading.
+      description: ''
+      authenticated: false
+      custom: []
+    headers:
+      Content-Type: multipart/form-data
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      content:
+        name: content
+        description: 'The content for the Home and Reading.'
+        required: true
+        example: '"Home and Reading description here."'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      image:
+        name: image
+        description: 'The image file for the Home and Reading (jpeg, png, jpg, gif, webp, max: 5048kb).'
+        required: true
+        example: null
+        type: file
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      heading:
+        name: heading
+        description: 'The heading for the Home and Reading.'
+        required: true
+        example: '"New Environment Heading"'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanBodyParameters:
+      content: '"Home and Reading description here."'
+      heading: '"New Environment Heading"'
+    fileParameters:
+      image: null
+    responses:
+      -
+        status: 201
+        content: |-
+          {
+            "success": 1,
+            "message": "Home and Reading Content Added Successfully",
+            "data": {
+                     "page": "HomeReading",
+                     "content": "This is the api where you can add content for Home and Reading",
+                     "image_url": "https://res.cloudinary.com/douuxmaix/image/upload/v1730797140/kcqitrbuiev0e7cbbolc.webp",
+                     "heading": "Adding Home and Reading Heading",
+                     "updated_at": "2024-11-05T08:58:54.000000Z",
+                     "created_at": "2024-11-05T08:58:54.000000Z",
+                        "id": 4
+           }
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 500
+        content: |-
+          {
+          "success": 0,
+          "message": "Error while Adding Home and Reading Content",
+          "error": "Error Message"
+          }
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - GET
+    uri: api/admin/Get/HomeReading
+    metadata:
+      groupName: HomeReading
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: |-
+        Retrieve a list of Home and Reading List.
+
+        This endpoint fetches all content entries where the `page` is set to "HomeReading".
+        If no content is found, it returns an error message.
+      description: ''
+      authenticated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+            "success": 1,
+            "message": "Home and Reading List",
+            "data": [
+              {
+                "id": 1,
+                "page": "HomeReading",
+                "content": "Sample content",
+                "image_url": "https://example.com/image.jpg",
+                "heading": "Sample Heading",
+                "created_at": "2024-11-04T10:00:00.000000Z",
+                "updated_at": "2024-11-04T10:00:00.000000Z"
+              }
+            ]
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 404
+        content: |-
+          {
+            "success": 0,
+            "error": "No Home and Reading Content Found"
+          }
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - POST
+    uri: api/admin/Update/HomeReading
+    metadata:
+      groupName: HomeReading
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: |-
+        Edit a Home and Reading
+
+        Updates an existing Home and Reading based on the provided ID.
+      description: ''
+      authenticated: false
+      custom: []
+    headers:
+      Content-Type: multipart/form-data
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      id:
+        name: id
+        description: 'The ID of the Home and Reading to update.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      content:
+        name: content
+        description: 'The updated content for the Home and Reading Content.'
+        required: false
+        example: '"Updated Home and Reading content."'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      heading:
+        name: heading
+        description: 'The updated heading for the Home and Reading Content.'
+        required: false
+        example: '"Updated Home and Reading Heading"'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      image:
+        name: image
+        description: 'The updated image file for the Home and Reading Content (jpeg, png, jpg, gif, webp, max: 5048kb).'
+        required: false
+        example: null
+        type: file
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+    cleanBodyParameters:
+      id: 1
+      content: '"Updated Home and Reading content."'
+      heading: '"Updated Home and Reading Heading"'
+    fileParameters:
+      image: null
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+            "success": 1,
+            "message": "Home and Reading Content Updated Successfully",
+            "data": {
+              "id": 1,
+              "page": "HomeReading",
+              "content": "Updated Home and Reading content",
+              "image_url": "https://example.com/updated-image.jpg",
+              "heading": "Updated Home and Reading Heading"
+            }
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 400
+        content: |-
+          {
+            "success": 0,
+            "error": "Provide the field that you want to update"
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 400
+        content: |-
+          {
+            "success": 0,
+            "error": "Content found, but it does not belong to the HomeReading page"
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 404
+        content: |-
+          {
+            "success": 0,
+            "error": "No data found with the provided Id"
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 422
+        content: |-
+          {
+            "success": 0,
+            "error": "Validation error message"
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 500
+        content: |-
+          {
+          "success": 0,
+          "message": "Error while Updating Home and Reading Content",
+          "error": "Error Message"
+          }
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []

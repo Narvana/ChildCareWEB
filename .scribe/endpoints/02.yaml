@@ -1,0 +1,309 @@
+name: 'Project & Activities'
+description: ''
+endpoints:
+  -
+    httpMethods:
+      - POST
+    uri: api/admin/Add/ProAct
+    metadata:
+      groupName: 'Project & Activities'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: |-
+        Add a Project & Activity
+
+        Adds a new Project & Activity with content, image, and heading.
+      description: ''
+      authenticated: false
+      custom: []
+    headers:
+      Content-Type: multipart/form-data
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      content:
+        name: content
+        description: 'The content for the Project & Activity.'
+        required: true
+        example: '"Project description here."'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      image:
+        name: image
+        description: 'The image file for the Project & Activity (jpeg, png, jpg, gif, webp, max: 5048kb).'
+        required: true
+        example: null
+        type: file
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+      heading:
+        name: heading
+        description: 'The heading for the Project & Activity.'
+        required: true
+        example: '"New Project Heading"'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+    cleanBodyParameters:
+      content: '"Project description here."'
+      heading: '"New Project Heading"'
+    fileParameters:
+      image: null
+    responses:
+      -
+        status: 201
+        content: |-
+          {
+            "success": 1,
+            "message": "Project & Activities Content Added Successfully",
+            "data": {
+                     "page": "ProAct",
+                        "content": "This is the api wh#ere you can add content for Project and Activities",
+                       "image_url": "https://res.cloudinary.com/douuxmaix/image/upload/v1730797140/kcqitrbuiev0e7cbbolc.webp",
+                        "heading": "Adding Project and Activities Heading",
+                       "updated_at": "2024-11-05T08:58:54.000000Z",
+                     "created_at": "2024-11-05T08:58:54.000000Z",
+                        "id": 4
+           }
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 500
+        content: |-
+          {
+          "success": 0,
+          "message": "Error while Adding Project and Activities",
+          "error": "Error Message"
+          }
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - GET
+    uri: api/admin/Get/ProAct
+    metadata:
+      groupName: 'Project & Activities'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: |-
+        Retrieve a list of Projects & Activities.
+
+        This endpoint fetches all content entries where the `page` is set to "ProAct".
+        If no content is found, it returns an error message.
+      description: ''
+      authenticated: false
+      custom: []
+    headers:
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+            "success": 1,
+            "message": "Project & Activities List",
+            "data": [
+              {
+                "id": 1,
+                "page": "ProAct",
+                "content": "Sample content",
+                "image_url": "https://example.com/image.jpg",
+                "heading": "Sample Heading",
+                "created_at": "2024-11-04T10:00:00.000000Z",
+                "updated_at": "2024-11-04T10:00:00.000000Z"
+              }
+            ]
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 404
+        content: |-
+          {
+            "success": 0,
+            "error": "No Content Found"
+          }
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
+  -
+    httpMethods:
+      - POST
+    uri: api/admin/Update/ProAct
+    metadata:
+      groupName: 'Project & Activities'
+      groupDescription: ''
+      subgroup: ''
+      subgroupDescription: ''
+      title: |-
+        Edit a Project & Activity
+
+        Updates an existing Project & Activity based on the provided ID.
+      description: ''
+      authenticated: false
+      custom: []
+    headers:
+      Content-Type: multipart/form-data
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      id:
+        name: id
+        description: 'The ID of the Project & Activity to update.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      content:
+        name: content
+        description: 'The updated content for the Project & Activity.'
+        required: false
+        example: '"Updated project content."'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      heading:
+        name: heading
+        description: 'The updated heading for the Project & Activity.'
+        required: false
+        example: '"Updated Project Heading"'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        custom: []
+      image:
+        name: image
+        description: 'The updated image file for the Project & Activity (jpeg, png, jpg, gif, webp, max: 5048kb).'
+        required: false
+        example: null
+        type: file
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        custom: []
+    cleanBodyParameters:
+      id: 1
+      content: '"Updated project content."'
+      heading: '"Updated Project Heading"'
+    fileParameters:
+      image: null
+    responses:
+      -
+        status: 200
+        content: |-
+          {
+            "success": 1,
+            "message": "Project & Activities Updated Successfully",
+            "data": {
+              "id": 1,
+              "page": "ProAct",
+              "content": "Updated content",
+              "image_url": "https://example.com/updated-image.jpg",
+              "heading": "Updated Heading"
+            }
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 400
+        content: |-
+          {
+            "success": 0,
+            "error": "Provide the field that you want to update"
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 400
+        content: |-
+          {
+            "success": 0,
+            "error": "Content found, but it does not belong to the Project and Activities page"
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 404
+        content: |-
+          {
+            "success": 0,
+            "error": "No data found with the provided Id"
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 422
+        content: |-
+          {
+            "success": 0,
+            "error": "Validation error message"
+          }
+        headers: []
+        description: ''
+        custom: []
+      -
+        status: 500
+        content: |-
+          {
+          "success": 0,
+          "message": "Error while Updating Project and Activities",
+          "error": "Error Message"
+          }
+        headers: []
+        description: ''
+        custom: []
+    responseFields: []
+    auth: []
+    controller: null
+    method: null
+    route: null
+    custom: []
