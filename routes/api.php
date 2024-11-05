@@ -68,4 +68,10 @@ function()
 
     Route::post('/Update/FundayFridays',[ContentController::class,'editFundayFridays']);
 
+    Route::post('/Add/PickUpDropOff',[ContentController::class,'addPickUpDropOff']);
+
+    Route::get('/Get/PickUpDropOff',[ContentController::class,'getPickUpDropOff']);
+
+    Route::post('/Update/PickUpDropOff',[ContentController::class,'editPickUpDropOff']);
+
 });
