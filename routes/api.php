@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ContentController;
 use App\Http\Controllers\Users\TestController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -31,3 +32,16 @@ function()
     Route::post('/Admin/Login',[UsersAccessController::class,'AdminLogin']);
 });
 
+Route::group(['middleware'=>['CheckBearerToken'], 'prefix'=>'admin'],
+function()
+{
+
+    Route::get('/Test/Token',[TestController::class,'Test']);
+
+    Route::post('/Add/ProAct',[ContentController::class,'addProAct']);
+
+    Route::get('/Get/ProAct',[ContentController::class,'ProAct']);
+
+    Route::post('/Update/ProAct',[ContentController::class,'editProAct']);
+
+});
