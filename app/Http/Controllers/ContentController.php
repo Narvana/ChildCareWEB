@@ -1220,5 +1220,247 @@ class ContentController extends Controller
          }
      }
 
+         /**
+     * @group FundayFridays
+     * 
+     * Retrieve a list of Funday Fridays List.
+     *
+     * This endpoint fetches all content entries where the `page` is set to "FundayFridays".
+     * If no content is found, it returns an error message.
+     *
+     * @response 200 {
+     *   "success": 1,
+     *   "message": "Funday Fridays List",
+     *   "data": [
+     *     {
+     *       "id": 1,
+     *       "page": "FundayFridays",
+     *       "content": "Sample content",
+     *       "image_url": "https://example.com/image.jpg",
+     *       "heading": "Sample Heading",
+     *       "created_at": "2024-11-04T10:00:00.000000Z",
+     *       "updated_at": "2024-11-04T10:00:00.000000Z"
+     *     }
+     *   ]
+     * }
+     *
+     * @response 404 {
+     *   "success": 0,
+     *   "error": "No Funday Fridays Content Found"
+     * }
+     */
+
+     public function getPickUpDropOff()
+     {
+         $contents = Content::where('page', 'PickUpDropOff')->get();
+         if($contents->isEmpty())
+         {
+             return response()->json([
+                 'success' => 0,
+                 'error' => 'No Pick Up and Drop Offs Content Found',
+             ],404);
+         }
+         return response()->json([
+             'success' => 1,
+             'message' => 'Pick Up and Drop Offs Content List',
+             'data' => $contents
+         ],200);
+     }
+ 
+     /**
+      * @group PickUpDropOff
+      * 
+      * Add Pick Up and Drop Offs Content
+      *
+      * Adds a new Pick Up and Drop Offs Content with content, image, and heading.
+      *
+      * @bodyParam content string required The content for the Pick Up and Drop Offs. Example: "Pick Up Drop Offs description here."
+      * @bodyParam image file required The image file for the Pick Up and Drop Offs (jpeg, png, jpg, gif, webp, max: 5048kb).
+      * @bodyParam heading string required The heading for the Pick Up and Drop Offs. Example: "New Pick Up Drop Offs Heading"
+      * @response 201 {
+      *   "success": 1,
+      *   "message": "Pick Up and Drop Offs Content Added Successfully",
+      *   "data": {
+      *            "page": "PickUpDropOff",
+      *            "content": "This is the api where you can add content for Pick Up and Drop Offs",
+      *            "image_url": "https://res.cloudinary.com/douuxmaix/image/upload/v1730797140/kcqitrbuiev0e7cbbolc.webp",
+      *            "heading": "Adding Pick Up and Drop Offs Heading",
+      *            "updated_at": "2024-11-05T08:58:54.000000Z",
+      *            "created_at": "2024-11-05T08:58:54.000000Z",
+      *               "id": 4
+      *  }
+      * }
+      * @resposne 422 {
+      * "success": 0,
+      * "error" : "Validation Error Message"
+      * } 
+      * @response 500 {
+      * "success": 0,
+      * "message": "Error while Adding Pick Up and Drop Offs Content",
+      * "error": "Error Message"
+      * }
+      */
+ 
+     public function addPickUpDropOff(Request $request)
+     {
+         $validator=Validator::make($request->all(),[
+             'content'=>'required',
+             'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5048',
+             'heading' => 'required'
+         ]);
+ 
+         if ($validator->fails()) {
+             return response()->json([
+                 'success' => 0,
+                 'error' => $validator->errors()->first()
+             ], 422);
+         }
+ 
+         try {
+             //code...
+             $image = $request->file('image');
+             $cloudinary = new Cloudinary();
+             $uploadResponse = $cloudinary->uploadApi()->upload($image->getRealPath());
+             $imageUrl = $uploadResponse['secure_url'];
+     
+             $content=Content::create([
+                 'page' => 'PickUpDropOff',
+                 'content' =>  str_replace("'", '#', $request->content),
+                 'image_url' => $imageUrl,
+                 'heading' => $request->heading
+             ]);
+     
+             return response()->json([
+                 'success' => 1,
+                 'message' => 'Pick Up and Drop Offs Content Added Successfully',
+                 'data' =>  $content
+             ]);
+         } catch (\Exception $e) {
+             // Handle any exceptions
+             return response()->json([
+                 'success' => 0,
+                 'message' => 'Error while Adding Pick Up and Drop Offs Content',
+                 'error' => $e->getMessage()
+             ], 500);
+         }
+     }
+ 
+     /**
+      * @group PickUpDropOff
+      * 
+      * Edit a Pick Up and Drop Offs
+      *
+      * Updates an existing Pick Up and Drop Offs based on the provided ID.
+      *
+      * @bodyParam id integer required The ID of the Pick Up and Drop Offs to update. Example: 1
+      * @bodyParam content string The updated content for the Pick Up and Drop Offs Content. Example: "Updated Pick Up and Drop Offs content."
+      * @bodyParam heading string The updated heading for the Pick Up and Drop Offs Content. Example: "Updated Pick Up and Drop Offs Heading"
+      * @bodyParam image file The updated image file for the Pick Up and Drop Offs Content (jpeg, png, jpg, gif, webp, max: 5048kb).
+      * @response {
+      *   "success": 1,
+      *   "message": "Pick Up and Drop Offs Content Updated Successfully",
+      *   "data": {
+      *     "id": 1,
+      *     "page": "PickUpDropOff",
+      *     "content": "Updated Pick Up and Drop Offs content",
+      *     "image_url": "https://example.com/updated-image.jpg",
+      *     "heading": "Updated Pick Up and Drop Offs Heading"
+      *   }
+      * }
+      * @response 422 {
+      *   "success": 0,
+      *   "error": "Validation error message"
+      * }
+      * @response 404 {
+      *   "success": 0,
+      *   "error": "No data found with the provided Id"
+      * }
+      * @response 400 {
+      *   "success": 0,
+      *   "error": "Provide the field that you want to update"
+      * }
+      * @response 400 {
+      *   "success": 0,
+      *   "error": "Content found, but it does not belong to the FundayFridays page"
+      * }
+      * @response 500 {
+      * "success": 0,
+      * "message": "Error while Updating Pick Up and Drop Offs Content",
+      * "error": "Error Message"
+      * }
+      */
+
+     public function editPickUpDropOff(Request $request)
+     {
+         $validator=Validator::make($request->all(),[
+             'id'=>'required|exists:contents,id',
+             'content'=>'sometimes',
+             'heading' => 'sometimes',
+             'image' => 'sometimes|image|mimes:jpeg,png,jpg,gif,webp|max:5048',
+         ]);
+ 
+         if ($validator->fails()) {
+             return response()->json([
+                 'success' => 0,
+                 'error' => $validator->errors()->first() // Get the first error message directly
+             ], 422);
+         }
+ 
+         try {
+             //code...
+             $content = Content::where('id', $request->id)->first();
+ 
+             if (!$content) {
+                 return response()->json([
+                     'success' => 0,
+                     'error' => 'No data found with the provided Id'
+                 ]);
+             }
+ 
+             if($content->page !== 'PickUpDropOff')
+             {
+                 return response()->json([
+                     'success' => 0,
+                     'error' => 'Content found, but it does not belong to the Pick Up and Drop Offs page',
+                 ],400);
+             }
+     
+             if(!$request->hasfile('image') && !$request->content && !$request->heading)
+             {
+                 return response()->json([
+                     'success' => 0,
+                     'error' => 'Provide the field that you want to update'
+                 ]); 
+             }
+     
+             if($request->hasFile('image')) {
+                 $cloudinary = new Cloudinary();
+                 $uploadResponse = $cloudinary->uploadApi()->upload($request->file('image')->getRealPath());
+                 $imageUrl = $uploadResponse['secure_url'];
+             } else {
+                 $imageUrl = $content->image_url;
+             }
+         
+             $content->update([
+                 'content' => $request->content ? str_replace("'", '#', $request->content) : $content->content ,
+                 'image_url' => $imageUrl,
+                 'heading' => $request->heading ? $request->heading : $content->heading,
+             ]);
+     
+             return response()->json([
+                'success' => 1,
+                'message' => 'Pick Up and Drop Offs Content Updated Successfully',
+                'data' => $content
+             ]);
+         } catch (\Exception $e) {
+             // Handle any exceptions
+             return response()->json([
+                 'success' => 0,
+                 'message' => 'Error while Updated Pick Up and Drop Off',
+                 'error' => $e->getMessage()
+             ], 500);
+         }
+     }
+
 
 }
