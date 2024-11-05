@@ -1220,21 +1220,21 @@ class ContentController extends Controller
          }
      }
 
-         /**
-     * @group FundayFridays
+    /**
+     * @group PickUpDropOff
      * 
-     * Retrieve a list of Funday Fridays List.
+     * Retrieve a list of Pick Up And Drop Offs List.
      *
-     * This endpoint fetches all content entries where the `page` is set to "FundayFridays".
+     * This endpoint fetches all content entries where the `page` is set to "PickUpDropOff".
      * If no content is found, it returns an error message.
      *
      * @response 200 {
      *   "success": 1,
-     *   "message": "Funday Fridays List",
+     *   "message": "Pick Up And Drop Offs List",
      *   "data": [
      *     {
      *       "id": 1,
-     *       "page": "FundayFridays",
+     *       "page": "PickUpDropOff",
      *       "content": "Sample content",
      *       "image_url": "https://example.com/image.jpg",
      *       "heading": "Sample Heading",
@@ -1246,7 +1246,7 @@ class ContentController extends Controller
      *
      * @response 404 {
      *   "success": 0,
-     *   "error": "No Funday Fridays Content Found"
+     *   "error": "No Pick Up And Drop Offs Content Found"
      * }
      */
 
@@ -1462,5 +1462,245 @@ class ContentController extends Controller
          }
      }
 
+         /**
+     * @group PickUpDropOff
+     * 
+     * Retrieve a list of Pick Up And Drop Offs List.
+     *
+     * This endpoint fetches all content entries where the `page` is set to "PickUpDropOff".
+     * If no content is found, it returns an error message.
+     *
+     * @response 200 {
+     *   "success": 1,
+     *   "message": "Pick Up And Drop Offs List",
+     *   "data": [
+     *     {
+     *       "id": 1,
+     *       "page": "PickUpDropOff",
+     *       "content": "Sample content",
+     *       "image_url": "https://example.com/image.jpg",
+     *       "heading": "Sample Heading",
+     *       "created_at": "2024-11-04T10:00:00.000000Z",
+     *       "updated_at": "2024-11-04T10:00:00.000000Z"
+     *     }
+     *   ]
+     * }
+     *
+     * @response 404 {
+     *   "success": 0,
+     *   "error": "No Pick Up And Drop Offs Content Found"
+     * }
+     */
 
+     public function getOutdoor()
+     {
+         $contents = Content::where('page', 'Outdoor')->get();
+         if($contents->isEmpty())
+         {
+             return response()->json([
+                 'success' => 0,
+                 'error' => 'No Outdoor Activities Content Found',
+             ],404);
+         }
+         return response()->json([
+             'success' => 1,
+             'message' => 'Outdoor Activities Content List',
+             'data' => $contents
+         ],200);
+     }
+
+     /**
+      * @group Outdoor
+      * 
+      * Add Outdoor Activities Content
+      *
+      * Adds a new Outdoor Activities Content with content, image, and heading.
+      *
+      * @bodyParam content string required The content for the Outdoor Activities. Example: "Outdoor Activities description here."
+      * @bodyParam image file required The image file for the Outdoor Activities (jpeg, png, jpg, gif, webp, max: 5048kb).
+      * @bodyParam heading string required The heading for the Outdoor Activities. Example: "New Outdoor Activities Heading"
+      * @response 201 {
+      *   "success": 1,
+      *   "message": "Outdoor Activities Content Added Successfully",
+      *   "data": {
+      *            "page": "Outdoor",
+      *            "content": "This is the api where you can add content for Outdoor Activities",
+      *            "image_url": "https://res.cloudinary.com/douuxmaix/image/upload/v1730797140/kcqitrbuiev0e7cbbolc.webp",
+      *            "heading": "Adding Outdoor Activities Heading",
+      *            "updated_at": "2024-11-05T08:58:54.000000Z",
+      *            "created_at": "2024-11-05T08:58:54.000000Z",
+      *               "id": 4
+      *  }
+      * }
+      * @resposne 422 {
+      * "success": 0,
+      * "error" : "Validation Error Message"
+      * } 
+      * @response 500 {
+      * "success": 0,
+      * "message": "Error while Adding Outdoor Activities Content",
+      * "error": "Error Message"
+      * }
+      */
+ 
+     public function addOutdoor(Request $request)
+     {
+         $validator=Validator::make($request->all(),[
+             'content'=>'required',
+             'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5048',
+             'heading' => 'required'
+         ]);
+ 
+         if ($validator->fails()) {
+             return response()->json([
+                 'success' => 0,
+                 'error' => $validator->errors()->first()
+             ], 422);
+         }
+ 
+         try {
+             //code...
+             $image = $request->file('image');
+             $cloudinary = new Cloudinary();
+             $uploadResponse = $cloudinary->uploadApi()->upload($image->getRealPath());
+             $imageUrl = $uploadResponse['secure_url'];
+     
+             $content=Content::create([
+                 'page' => 'Outdoor',
+                 'content' =>  str_replace("'", '#', $request->content),
+                 'image_url' => $imageUrl,
+                 'heading' => $request->heading
+             ]);
+     
+             return response()->json([
+                 'success' => 1,
+                 'message' => 'Outdoor Activities Content Added Successfully',
+                 'data' =>  $content
+             ]);
+         } catch (\Exception $e) {
+             // Handle any exceptions
+             return response()->json([
+                 'success' => 0,
+                 'message' => 'Error while Adding Outdoor Activities Content',
+                 'error' => $e->getMessage()
+             ], 500);
+         }
+     }
+ 
+     /**
+      * @group Outdoor
+      * 
+      * Edit a Outdoor Activities
+      *
+      * Updates an existing Outdoor Activities based on the provided ID.
+      *
+      * @bodyParam id integer required The ID of the Outdoor Activities to update. Example: 1
+      * @bodyParam content string The updated content for the Outdoor Activities Content. Example: "Updated Outdoor Activities content."
+      * @bodyParam heading string The updated heading for the Outdoor Activities Content. Example: "Updated Outdoor Activities Heading"
+      * @bodyParam image file The updated image file for the Outdoor Activities Content (jpeg, png, jpg, gif, webp, max: 5048kb).
+      * @response {
+      *   "success": 1,
+      *   "message": "Outdoor Activities Content Updated Successfully",
+      *   "data": {
+      *     "id": 1,
+      *     "page": "Outdoor",
+      *     "content": "Updated Outdoor Activities content",
+      *     "image_url": "https://example.com/updated-image.jpg",
+      *     "heading": "Updated Outdoor Activities Heading"
+      *   }
+      * }
+      * @response 422 {
+      *   "success": 0,
+      *   "error": "Validation error message"
+      * }
+      * @response 404 {
+      *   "success": 0,
+      *   "error": "No data found with the provided Id"
+      * }
+      * @response 400 {
+      *   "success": 0,
+      *   "error": "Provide the field that you want to update"
+      * }
+      * @response 400 {
+      *   "success": 0,
+      *   "error": "Content found, but it does not belong to the Outdoor Activities page"
+      * }
+      * @response 500 {
+      * "success": 0,
+      * "message": "Error while Updating Outdoor Activities Content",
+      * "error": "Error Message"
+      * }
+      */
+
+     public function editOutdoor(Request $request)
+     {
+         $validator=Validator::make($request->all(),[
+             'id'=>'required|exists:contents,id',
+             'content'=>'sometimes',
+             'heading' => 'sometimes',
+             'image' => 'sometimes|image|mimes:jpeg,png,jpg,gif,webp|max:5048',
+         ]);
+ 
+         if ($validator->fails()) {
+             return response()->json([
+                 'success' => 0,
+                 'error' => $validator->errors()->first() // Get the first error message directly
+             ], 422);
+         }
+ 
+         try {
+             //code...
+             $content = Content::where('id', $request->id)->first();
+ 
+             if (!$content) {
+                 return response()->json([
+                     'success' => 0,
+                     'error' => 'No data found with the provided Id'
+                 ]);
+             }
+ 
+             if($content->page !== 'Outdoor')
+             {
+                 return response()->json([
+                     'success' => 0,
+                     'error' => 'Content found, but it does not belong to the Pick Up and Drop Offs page',
+                 ],400);
+             }
+     
+             if(!$request->hasfile('image') && !$request->content && !$request->heading)
+             {
+                 return response()->json([
+                     'success' => 0,
+                     'error' => 'Provide the field that you want to update'
+                 ]); 
+             }
+     
+             if($request->hasFile('image')) {
+                 $cloudinary = new Cloudinary();
+                 $uploadResponse = $cloudinary->uploadApi()->upload($request->file('image')->getRealPath());
+                 $imageUrl = $uploadResponse['secure_url'];
+             } else {
+                 $imageUrl = $content->image_url;
+             }
+         
+             $content->update([
+                 'content' => $request->content ? str_replace("'", '#', $request->content) : $content->content ,
+                 'image_url' => $imageUrl,
+                 'heading' => $request->heading ? $request->heading : $content->heading,
+             ]);
+     
+             return response()->json([
+                'success' => 1,
+                'message' => 'Outdoor Activities Content Updated Successfully',
+                'data' => $content
+             ]);
+         } catch (\Exception $e) {
+             // Handle any exceptions
+             return response()->json([
+                 'success' => 0,
+                 'message' => 'Error while Updating Outdoor Activities',
+                 'error' => $e->getMessage()
+             ], 500);
+         }
+     }
 }
