@@ -56,4 +56,10 @@ function()
 
     Route::post('/Update/HomeReading',[ContentController::class,'editHomeReading']);
 
+    Route::post('/Add/MusicMovement',[ContentController::class,'addMusicMovement']);
+
+    Route::get('/Get/MusicMovement',[ContentController::class,'getMusicMovement']);
+
+    Route::post('/Update/MusicMovement',[ContentController::class,'editMusicMovement']);
+
 });
