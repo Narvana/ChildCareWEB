@@ -978,5 +978,247 @@ class ContentController extends Controller
          }
      }
 
+    /**
+     * @group FundayFridays
+     * 
+     * Retrieve a list of Funday Fridays List.
+     *
+     * This endpoint fetches all content entries where the `page` is set to "FundayFridays".
+     * If no content is found, it returns an error message.
+     *
+     * @response 200 {
+     *   "success": 1,
+     *   "message": "Funday Fridays List",
+     *   "data": [
+     *     {
+     *       "id": 1,
+     *       "page": "FundayFridays",
+     *       "content": "Sample content",
+     *       "image_url": "https://example.com/image.jpg",
+     *       "heading": "Sample Heading",
+     *       "created_at": "2024-11-04T10:00:00.000000Z",
+     *       "updated_at": "2024-11-04T10:00:00.000000Z"
+     *     }
+     *   ]
+     * }
+     *
+     * @response 404 {
+     *   "success": 0,
+     *   "error": "No Funday Fridays Content Found"
+     * }
+     */
+
+     public function getFundayFridays()
+     {
+         $contents = Content::where('page', 'FundayFridays')->get();
+         if($contents->isEmpty())
+         {
+             return response()->json([
+                 'success' => 0,
+                 'error' => 'No Funday Fridays Content Found',
+             ],404);
+         }
+         return response()->json([
+             'success' => 1,
+             'message' => 'Funday Fridays Content List',
+             'data' => $contents
+         ],200);
+     }
+ 
+     /**
+      * @group FundayFridays
+      * 
+      * Add Funday Fridays Content
+      *
+      * Adds a new Funday Fridays Content with content, image, and heading.
+      *
+      * @bodyParam content string required The content for the Funday Fridays. Example: "Funday Fridays description here."
+      * @bodyParam image file required The image file for the Funday Fridays (jpeg, png, jpg, gif, webp, max: 5048kb).
+      * @bodyParam heading string required The heading for the Funday Fridays. Example: "New Funday Fridays Heading"
+      * @response 201 {
+      *   "success": 1,
+      *   "message": "Funday Fridays Content Added Successfully",
+      *   "data": {
+      *            "page": "FundayFridays",
+      *            "content": "This is the api where you can add content for Funday Fridays",
+      *            "image_url": "https://res.cloudinary.com/douuxmaix/image/upload/v1730797140/kcqitrbuiev0e7cbbolc.webp",
+      *            "heading": "Adding Funday Fridays Heading",
+      *            "updated_at": "2024-11-05T08:58:54.000000Z",
+      *            "created_at": "2024-11-05T08:58:54.000000Z",
+      *               "id": 4
+      *  }
+      * }
+      * @resposne 422 {
+      * "success": 0,
+      * "error" : "Validation Error Message"
+      * } 
+      * @response 500 {
+      * "success": 0,
+      * "message": "Error while Adding Funday Fridays Content",
+      * "error": "Error Message"
+      * }
+      */
+ 
+     public function addFundayFridays(Request $request)
+     {
+         $validator=Validator::make($request->all(),[
+             'content'=>'required',
+             'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5048',
+             'heading' => 'required'
+         ]);
+ 
+         if ($validator->fails()) {
+             return response()->json([
+                 'success' => 0,
+                 'error' => $validator->errors()->first()
+             ], 422);
+         }
+ 
+         try {
+             //code...
+             $image = $request->file('image');
+             $cloudinary = new Cloudinary();
+             $uploadResponse = $cloudinary->uploadApi()->upload($image->getRealPath());
+             $imageUrl = $uploadResponse['secure_url'];
+     
+             $content=Content::create([
+                 'page' => 'FundayFridays',
+                 'content' =>  str_replace("'", '#', $request->content),
+                 'image_url' => $imageUrl,
+                 'heading' => $request->heading
+             ]);
+     
+             return response()->json([
+                 'success' => 1,
+                 'message' => 'Funday Fridays Content Added Successfully',
+                 'data' =>  $content
+             ]);
+         } catch (\Exception $e) {
+             // Handle any exceptions
+             return response()->json([
+                 'success' => 0,
+                 'message' => 'Error while Adding Funday Fridays Content',
+                 'error' => $e->getMessage()
+             ], 500);
+         }
+     }
+ 
+     /**
+      * @group FundayFridays
+      * 
+      * Edit a Funday Fridays
+      *
+      * Updates an existing FundayFridays based on the provided ID.
+      *
+      * @bodyParam id integer required The ID of the Funday Fridays to update. Example: 1
+      * @bodyParam content string The updated content for the Funday Fridays Content. Example: "Updated Funday Fridays content."
+      * @bodyParam heading string The updated heading for the Funday Fridays Content. Example: "Updated Funday Fridays Heading"
+      * @bodyParam image file The updated image file for the Funday Fridays Content (jpeg, png, jpg, gif, webp, max: 5048kb).
+      * @response {
+      *   "success": 1,
+      *   "message": "Funday Fridays Content Updated Successfully",
+      *   "data": {
+      *     "id": 1,
+      *     "page": "FundayFridays",
+      *     "content": "Updated Funday Fridays content",
+      *     "image_url": "https://example.com/updated-image.jpg",
+      *     "heading": "Updated Funday Fridays Heading"
+      *   }
+      * }
+      * @response 422 {
+      *   "success": 0,
+      *   "error": "Validation error message"
+      * }
+      * @response 404 {
+      *   "success": 0,
+      *   "error": "No data found with the provided Id"
+      * }
+      * @response 400 {
+      *   "success": 0,
+      *   "error": "Provide the field that you want to update"
+      * }
+      * @response 400 {
+      *   "success": 0,
+      *   "error": "Content found, but it does not belong to the FundayFridays page"
+      * }
+      * @response 500 {
+      * "success": 0,
+      * "message": "Error while Updating Funday Fridays Content",
+      * "error": "Error Message"
+      * }
+      */
+
+     public function editFundayFridays(Request $request)
+     {
+         $validator=Validator::make($request->all(),[
+             'id'=>'required|exists:contents,id',
+             'content'=>'sometimes',
+             'heading' => 'sometimes',
+             'image' => 'sometimes|image|mimes:jpeg,png,jpg,gif,webp|max:5048',
+         ]);
+ 
+         if ($validator->fails()) {
+             return response()->json([
+                 'success' => 0,
+                 'error' => $validator->errors()->first() // Get the first error message directly
+             ], 422);
+         }
+ 
+         try {
+             //code...
+             $content = Content::where('id', $request->id)->first();
+ 
+             if (!$content) {
+                 return response()->json([
+                     'success' => 0,
+                     'error' => 'No data found with the provided Id'
+                 ]);
+             }
+ 
+             if($content->page !== 'FundayFridays')
+             {
+                 return response()->json([
+                     'success' => 0,
+                     'error' => 'Content found, but it does not belong to the Funday Fridays page',
+                 ],400);
+             }
+     
+             if(!$request->hasfile('image') && !$request->content && !$request->heading)
+             {
+                 return response()->json([
+                     'success' => 0,
+                     'error' => 'Provide the field that you want to update'
+                 ]); 
+             }
+     
+             if($request->hasFile('image')) {
+                 $cloudinary = new Cloudinary();
+                 $uploadResponse = $cloudinary->uploadApi()->upload($request->file('image')->getRealPath());
+                 $imageUrl = $uploadResponse['secure_url'];
+             } else {
+                 $imageUrl = $content->image_url;
+             }
+         
+             $content->update([
+                 'content' => $request->content ? str_replace("'", '#', $request->content) : $content->content ,
+                 'image_url' => $imageUrl,
+                 'heading' => $request->heading ? $request->heading : $content->heading,
+             ]);
+     
+             return response()->json([
+                'success' => 1,
+                'message' => 'Funday Fridays Content Updated Successfully',
+                'data' => $content
+             ]);
+         } catch (\Exception $e) {
+             // Handle any exceptions
+             return response()->json([
+                 'success' => 0,
+                 'message' => 'Error while Updated Funday Fridays',
+                 'error' => $e->getMessage()
+             ], 500);
+         }
+     }
+
 
 }
