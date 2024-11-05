@@ -62,4 +62,10 @@ function()
 
     Route::post('/Update/MusicMovement',[ContentController::class,'editMusicMovement']);
 
+    Route::post('/Add/FundayFridays',[ContentController::class,'addFundayFridays']);
+
+    Route::get('/Get/FundayFridays',[ContentController::class,'getFundayFridays']);
+
+    Route::post('/Update/FundayFridays',[ContentController::class,'editFundayFridays']);
+
 });
