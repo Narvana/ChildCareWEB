@@ -50,4 +50,10 @@ function()
 
     Route::post('/Update/Environment',[ContentController::class,'editEnvironment']);
 
+    Route::post('/Add/HomeReading',[ContentController::class,'addHomeReading']);
+
+    Route::get('/Get/HomeReading',[ContentController::class,'getHomeReading']);
+
+    Route::post('/Update/HomeReading',[ContentController::class,'editHomeReading']);
+
 });
