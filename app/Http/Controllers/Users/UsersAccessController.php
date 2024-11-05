@@ -8,16 +8,52 @@ use Illuminate\Http\Request;
 // Model
 use App\Models\User;
 
+// 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
+// Email Validation
 use Egulias\EmailValidator\EmailValidator;
 use Egulias\EmailValidator\Validation\RFCValidation;
 
 class UsersAccessController extends Controller
 {
     //
+    /**
+     * @group Admin Management
+     *
+     * Register a new Admin.
+     *
+     * This endpoint allows you to register a new admin user by providing a name, email, and password.
+     *
+     * @bodyParam name string required The name of the admin. Example: John Doe
+     * @bodyParam email string required The email address of the admin. Must be a valid and unique email. Example: admin@example.com
+     * @bodyParam password string required The password for the admin account. Must be at least 8 characters, include an uppercase letter, lowercase letter, digit, and special character. Example: Password123!
+     *
+     * @response 201 {
+     *   "success": 1,
+     *   "message": "Admin registered successfully",
+     *   "admin": {
+     *     "id": 1,
+     *     "name": "John Doe",
+    *     "email": "admin@example.com",
+    *     "created_at": "2024-11-04T12:00:00.000000Z",
+    *     "updated_at": "2024-11-04T12:00:00.000000Z"
+    *   }
+    * }
+    *
+    * @response 422 {
+    *   "success": 0,
+    *   "error": "The email field is required."
+    * }
+    *
+    * @response 500 {
+    *   "success": 0,
+    *   "message": "Error while Register",
+    *   "error": "Detailed error message."
+    * }
+    */
     public function AdminRegister(Request $request)
     {
         $validator=Validator::make($request->all(),[
@@ -43,14 +79,9 @@ class UsersAccessController extends Controller
         ]);
 
         if ($validator->fails()) {
-            $errors = $validator->errors()->all(); // Get all error messages
-            $formattedErrors = [];
-            foreach ($errors as $error) {
-                $formattedErrors[] = $error;
-            }
             return response()->json([
                 'success' => 0,
-                'error' => $formattedErrors[0]
+                'error' => $validator->errors()->first() // Get the first error message directly
             ], 422);
         }
 
@@ -87,6 +118,39 @@ class UsersAccessController extends Controller
         }
     }
 
+    
+    /**
+     * @group Admin Management
+     *
+     * Admin Login
+     *
+     * This endpoint allows an admin user to log in using their email and password. Upon successful authentication, a token is returned.
+     *
+     * @bodyParam email string required The email address of the admin. Example: admin@example.com
+     * @bodyParam password string required The password for the admin account. Must be at least 8 characters, include an uppercase letter, lowercase letter, digit, and special character. Example: Password123!
+     *
+     * @response 200 {
+     *   "access_token": "your_jwt_token_here",
+     *   "token_type": "bearer",
+     *   "expires_in": 3600
+     * }
+     *
+     * @response 404 {
+     *   "success": 0,
+     *   "error": "Email does not exist"
+     * }
+     *
+     * @response 401 {
+     *   "success": 0,
+     *   "error": "Password does not match"
+     * }
+     *
+     * @response 500 {
+     *   "success": 0,
+     *   "message": "Error while Login",
+     *   "error": "Detailed error message"
+     * }
+     */   
     public function AdminLogin(Request $request)
     {
         $validator=Validator::make($request->all(),[
@@ -100,17 +164,11 @@ class UsersAccessController extends Controller
         ]);
 
         if ($validator->fails()) {
-            $errors = $validator->errors()->all(); // Get all error messages
-            $formattedErrors = [];
-            foreach ($errors as $error) {
-                $formattedErrors[] = $error;
-            }
             return response()->json([
                 'success' => 0,
-                'error' => $formattedErrors[0]
+                'error' => $validator->errors()->first() // Get the first error message directly
             ], 422);
         }
-
             //code...
             $credentials = $request->only('email','password');
             $admin = User::where('email',$credentials['email'])->first();
