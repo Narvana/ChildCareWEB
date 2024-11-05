@@ -13,11 +13,12 @@ class ContentController extends Controller
     /**
      * @group Project & Activities
      * 
-     * Get Project & Activities List
+     * Retrieve a list of Projects & Activities.
      *
-     * Fetch the list of all Projects & Activities.
+     * This endpoint fetches all content entries where the `page` is set to "ProAct".
+     * If no content is found, it returns an error message.
      *
-     * @response {
+     * @response 200 {
      *   "success": 1,
      *   "message": "Project & Activities List",
      *   "data": [
@@ -26,20 +27,33 @@ class ContentController extends Controller
      *       "page": "ProAct",
      *       "content": "Sample content",
      *       "image_url": "https://example.com/image.jpg",
-     *       "heading": "Sample Heading"
+     *       "heading": "Sample Heading",
+     *       "created_at": "2024-11-04T10:00:00.000000Z",
+     *       "updated_at": "2024-11-04T10:00:00.000000Z"
      *     }
      *   ]
      * }
+     *
+     * @response 404 {
+     *   "success": 0,
+     *   "error": "No Content Found"
+     * }
      */
-    
     public function getProAct()
     {
         $contents = Content::where('page', 'ProAct')->get();
+        if($contents->isEmpty())
+        {
+            return response()->json([
+                'success' => 0,
+                'error' => 'No Content Found',
+            ],404);
+        }
         return response()->json([
             'success' => 1,
             'message' => 'Project & Activities List',
             'data' => $contents
-        ]);
+        ],200);
     }
 
 
@@ -53,10 +67,27 @@ class ContentController extends Controller
      * @bodyParam content string required The content for the Project & Activity. Example: "Project description here."
      * @bodyParam image file required The image file for the Project & Activity (jpeg, png, jpg, gif, webp, max: 5048kb).
      * @bodyParam heading string required The heading for the Project & Activity. Example: "New Project Heading"
-     * @response {
+     * @response 201 {
      *   "success": 1,
-     *   "message": "Project & Activities Added Successfully",
-     *   "data": []
+     *   "message": "Project & Activities Content Added Successfully",
+     *   "data": {
+     *            "page": "ProAct",
+     *               "content": "This is the api wh#ere you can add content for Project and Activities",
+     *              "image_url": "https://res.cloudinary.com/douuxmaix/image/upload/v1730797140/kcqitrbuiev0e7cbbolc.webp",
+     *               "heading": "Adding Project and Activities Heading",
+     *              "updated_at": "2024-11-05T08:58:54.000000Z",
+     *            "created_at": "2024-11-05T08:58:54.000000Z",
+     *               "id": 4
+     *  }
+     * }
+     * @resposne 422 {
+     * "success": 0,
+     * "error" : "Validation Error Message"
+     * } 
+     * @response 500 {
+     * "success": 0,
+     * "message": "Error while Adding Project and Activities",
+     * "error": "Error Message"
      * }
      */
 
@@ -64,7 +95,7 @@ class ContentController extends Controller
     {
         $validator=Validator::make($request->all(),[
             'content'=>'required',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:5048,webp',
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5048',
             'heading' => 'required'
         ]);
 
@@ -74,24 +105,35 @@ class ContentController extends Controller
                 'error' => $validator->errors()->first() // Get the first error message directly
             ], 422);
         }
-        
-        $image = $request->file('image');
-        $cloudinary = new Cloudinary();
-        $uploadResponse = $cloudinary->uploadApi()->upload($image->getRealPath());
-        $imageUrl = $uploadResponse['secure_url'];
 
-        Content::create([
-            'page' => 'ProAct',
-            'content' =>  str_replace("'", '#', $request->content),
-            'image_url' => $imageUrl,
-            'heading' => $request->heading
-        ]);
-        // return redirect()->route('business')->with('success', 'Business added successfully');
-        return response()->json([
-            'success' => 1,
-            'message' => 'Project & Activities Added Successfully',
-            'data' => []
-        ]);
+        try {
+            //code...
+            $image = $request->file('image');
+            $cloudinary = new Cloudinary();
+            $uploadResponse = $cloudinary->uploadApi()->upload($image->getRealPath());
+            $imageUrl = $uploadResponse['secure_url'];
+    
+            $content = Content::create([
+                'page' => 'ProAct',
+                'content' =>  str_replace("'", '#', $request->content),
+                'image_url' => $imageUrl,
+                'heading' => $request->heading
+            ]);
+            return response()->json([
+                'success' => 1,
+                'message' => 'Project & Activities Content Added Successfully',
+                'data' => $content
+            ],201);
+        } catch (\Exception $e) {
+            // Handle any exceptions
+            return response()->json([
+                'success' => 0,
+                'message' => 'Error while Adding Project and Activities',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+        
+
     }
 
     /**
@@ -128,6 +170,15 @@ class ContentController extends Controller
      *   "success": 0,
      *   "error": "Provide the field that you want to update"
      * }
+     * @response 400 {
+     *   "success": 0,
+     *   "error": "Content found, but it does not belong to the Project and Activities page"
+     * }
+     * @response 500 {
+     * "success": 0,
+     * "message": "Error while Updating Project and Activities",
+     * "error": "Error Message"
+     * }
      */
 
     public function editProAct(Request $request)
@@ -146,44 +197,59 @@ class ContentController extends Controller
             ], 422);
         }
 
-        $content = Content::where('id', $request->id)->first();
+        try {
+            //code...
+            $content = Content::where('id', $request->id)->first();
 
-        if (!$content) {
-            return response()->json([
-                'success' => 0,
-                'error' => 'No data found with the provided Id'
-            ]);
-        }
-
-        if(!$request->hasfile('image') && !$request->content && !$request->heading)
-        {
-            return response()->json([
-                'success' => 0,
-                'error' => 'Provide the field that you want to update'
-            ]); 
-        }
-
-        if($request->hasFile('image')) {
-            $cloudinary = new Cloudinary();
-            $uploadResponse = $cloudinary->uploadApi()->upload($request->file('image')->getRealPath());
-            $imageUrl = $uploadResponse['secure_url'];
-        } else {
-            $imageUrl = $content->image_url;
-        }
+            if (!$content) {
+                return response()->json([
+                    'success' => 0,
+                    'error' => 'No data found with the provided Id'
+                ]);
+            }
+            if ($content->page !== 'ProAct') {
+                return response()->json([
+                    'success' => 0,
+                    'error' => 'Content found, but it does not belong to the Project and Activities page',
+                ],400);
+            }
     
-        $content->update([
-            'content' => $request->content ? str_replace("'", '#', $request->content) : $content->content ,
-            'image_url' => $imageUrl,
-            'heading' => $request->heading ? $request->heading : $content->heading,
-        ]);
-
-        return response()->json([
-            'success' => 1,
-            'message' => 'Project & Activities Updated Successfully',
-            'data' => $content
-        ]);
+            if(!$request->hasfile('image') && !$request->content && !$request->heading)
+            {
+                return response()->json([
+                    'success' => 0,
+                    'error' => 'Provide the field that you want to update'
+                ]); 
+            }
+    
+            if($request->hasFile('image')) {
+                $cloudinary = new Cloudinary();
+                $uploadResponse = $cloudinary->uploadApi()->upload($request->file('image')->getRealPath());
+                $imageUrl = $uploadResponse['secure_url'];
+            } else {
+                $imageUrl = $content->image_url;
+            }
+        
+            $content->update([
+                'content' => $request->content ? str_replace("'", '#', $request->content) : $content->content ,
+                'image_url' => $imageUrl,
+                'heading' => $request->heading ? $request->heading : $content->heading,
+            ]);
+    
+            return response()->json([
+                'success' => 1,
+                'message' => 'Project & Activities Content Updated Successfully',
+                'data' => $content
+            ]);
+        } catch (\Exception $e) {
+            // Handle any exceptions
+            return response()->json([
+                'success' => 0,
+                'message' => 'Error while Adding Project and Activities',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
-
 
 
 
