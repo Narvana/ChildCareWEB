@@ -85,5 +85,12 @@ function()
     Route::get('/Get/Curriculum',[ContentController::class,'getCurriculum']);
 
     Route::post('/Update/Curriculum',[ContentController::class,'editCurriculum']);
+    // PottyTraining
+
+    Route::post('/Add/PottyTraining',[ContentController::class,'addPottyTraining']);
+
+    Route::get('/Get/PottyTraining',[ContentController::class,'getPottyTraining']);
+
+    Route::post('/Update/PottyTraining',[ContentController::class,'editPottyTraining']);
 
 });
