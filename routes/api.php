@@ -40,8 +40,14 @@ function()
 
     Route::post('/Add/ProAct',[ContentController::class,'addProAct']);
 
-    Route::get('/Get/ProAct',[ContentController::class,'ProAct']);
+    Route::get('/Get/ProAct',[ContentController::class,'getProAct']);
 
     Route::post('/Update/ProAct',[ContentController::class,'editProAct']);
+
+    Route::post('/Add/Environment',[ContentController::class,'addEnvironment']);
+
+    Route::get('/Get/Envirnoment',[ContentController::class,'getEnvironment']);
+
+    Route::post('/Update/Environment',[ContentController::class,'editEnvironment']);
 
 });
