@@ -93,4 +93,6 @@ function()
 
     Route::post('/Update/PottyTraining',[ContentController::class,'editPottyTraining']);
 
+    Route::delete('/Delete',[ContentController::class,'delete']);
+
 });

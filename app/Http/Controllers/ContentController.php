@@ -2188,4 +2188,58 @@ class ContentController extends Controller
              ], 500);
          }
      }
+    
+    /**
+ * Delete a content item.
+ *
+ * This endpoint allows deleting a specific content item by its ID.
+ *
+ * @group Content Management
+ * 
+ * @bodyParam id integer required The ID of the content to be deleted. Example: 1
+ * 
+ * @response 200 {
+ *   "success": 1,
+ *   "message": "Content deleted successfully"
+ * }
+ * @response 404 {
+ *   "success": 0,
+ *   "message": "Content not found"
+ * }
+ * @response 500 {
+ *   "success": 0,
+ *   "message": "An error occurred during deletion"
+ * }
+ */
+public function delete(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'id' => 'required|exists:contents,id',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json([
+            'success' => 0,
+            'message' => $validator->errors()->first(),
+        ], 422);
+    }
+
+    try {
+        $data = $validator->validated();
+        Content::where('id', $data['id'])->delete();
+
+        return response()->json([
+            'success' => 1,
+            'message' => 'Content deleted successfully',
+        ], 200);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => 0,
+            'message' => 'An error occurred during deletion',
+            'error' => $e->getMessage(),
+        ], 500);
+    }
+}
+
+
 }
