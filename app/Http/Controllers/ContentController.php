@@ -7,6 +7,9 @@ use Illuminate\Support\Facades\Validator;
 use  App\Models\Content;
 // use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Cloudinary\Cloudinary;
+use Illuminate\Support\Facades\DB;
+
+use function PHPUnit\Framework\isEmpty;
 
 class ContentController extends Controller
 {
@@ -2239,6 +2242,46 @@ public function delete(Request $request)
             'error' => $e->getMessage(),
         ], 500);
     }
+}
+
+public function getPage(Request $request)
+{
+    $AllContent=[];
+    $content= DB::table('contents')
+    ->select(
+        'page'
+    )->distinct()->get();
+
+    foreach ($content as $con) {
+        array_push($AllContent,$con->page);
+    }
+
+    return response()->json([
+        'success'=> 1,
+        'message' => 'All Content',
+        'data' =>  $AllContent,   
+    ],200);
+}
+
+public function getAllContent(Request $request)
+{
+    $page=$request->query('page');
+    if(!$page)
+    {
+        return response()->json(['success'=>0, 'message'=>'Please select a page'],400);
+    }
+
+    $content = Content::where('page',$page)->get();
+
+    if($content->isEmpty())
+    {
+        return response()->json(['success'=>0, 'message'=>'No Content found for provided page'],400);
+    }
+    return response()->json([
+        'success'=>1, 
+        'data'=> $content,
+        'message'=>"All Content"
+    ],200);
 }
 
 
